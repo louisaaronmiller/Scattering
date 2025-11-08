@@ -18,7 +18,7 @@ rmax = 20
 
 # -------------------- Potential, Energy, and Schrodinger terms --------------------
 
-def V(r,R=R):
+def V(r,R=R,V_0=V_0):
     if r < R:
         return V_0
     else:
@@ -26,11 +26,11 @@ def V(r,R=R):
         return 0
 
 
-def F(l, r, E,R=R):
+def F(l, r, E,R=R,V_0=V_0):
     if r == 0:
         return 0
     else:
-        func_val = V(r,R) + (l * (l + 1)) / (r**2) - E
+        func_val = V(r,R,V_0) + (l * (l + 1)) / (r**2) - E
         return func_val
 
 
@@ -41,7 +41,7 @@ def k(E, r,R=R):
         return math.sqrt(E - V_0)
 
 
-def Numerov(l: int, E: float,rmax = rmax,R=R, h = 0.01):
+def Numerov(l: int, E: float,rmax = rmax,R=R, h = 0.01,V_0=V_0):
     rvals = np.arange(0, rmax, h)
     n = len(rvals)
 
@@ -49,13 +49,13 @@ def Numerov(l: int, E: float,rmax = rmax,R=R, h = 0.01):
         0.000,
         (h ** (l + 1)),
     ]  # Again recommended in the textbook to use this as the second point
-    w0 = (1 - ((h**2) / 12) * F(l, rvals[0], E, R)) * u[0]
-    w1 = (1 - ((h**2) / 12) * F(l, rvals[1], E, R)) * u[1]
+    w0 = (1 - ((h**2) / 12) * F(l, rvals[0], E, R,V_0)) * u[0]
+    w1 = (1 - ((h**2) / 12) * F(l, rvals[1], E, R,V_0)) * u[1]
     w = [w0, w1]
 
     for i in range(1, n - 1):
-        fval = F(l, rvals[i], E, R)
-        fval_p1 = F(l, rvals[i + 1], E, R)
+        fval = F(l, rvals[i], E, R,V_0)
+        fval_p1 = F(l, rvals[i + 1], E, R,V_0)
 
         wnp1 = 2 * w[i] - w[i - 1] + (h**2) * fval * u[i]  # w_{n+1}
         unp1 = wnp1 / (1 - (((h**2) / (12)) * fval_p1))  # u_{n+1}
@@ -155,15 +155,17 @@ def sigma(l, delta,E):
 
 # -------------------- Delta, Sigma, Energies, Momenta simulation --------------------
 
-def PhaseforEnergy(l: int,E_max = 30,rmax = rmax,R=R, h = 0.001):
-    E = np.arange(1, E_max, 0.1)
+def PhaseforEnergy(l: int,E_min = 0,E_max = 30,rmax = rmax,R=R, h = 0.001,V_0=V_0,flag = True):
+    E = np.arange(E_min, E_max, 0.1)
+    if flag is False:
+        E = np.linspace(E_min,E_max,500)
     delta = []
     k = []
     sigmas = []
     for i in E:
         k.append(np.sqrt(i))
 
-        u, r = Numerov(l, i, rmax, R, h)
+        u, r = Numerov(l, i, rmax, R, h,V_0)
         u_aug, r_aug = outside_vals(r, u,R)
         r_new, u_new = r_1halfr_2(r_aug, u_aug, i)
 
@@ -466,11 +468,27 @@ plt.xlabel("Potential Energy-Radii Relation $\\gamma$")
 
 '''
 # -------- Phaseshift vs momentum for each resonance 0,1,2 --------
+delta_res1, Elistres1, kires1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(np.pi)**2,False)
+delta_res2, Elistres2, kires2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(3*np.pi)**2,False)
+delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(5*np.pi)**2,False)
 
+plt.plot(kires1,delta_res1,label="$\\gamma$ = $\\pi/2$")
+plt.plot(kires2,delta_res2,label="$\\gamma$ = $3\\pi/2$")
+plt.plot(kires3,delta_res3,label="$\\gamma$ = $5\\pi/2$")
 
+# ------------------------------------ checking small perturbations in potential to see if phase shift vs momentum shows anything different.
 
+delta_resoff1, Elistres1, kiresoff1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((np.pi)**2 - 5),False)
+delta_resoff2, Elistres2, kiresoff2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((3*np.pi)**2 +9),False)
+delta_resoff3, Elistres3, kiresoff3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((5*np.pi)**2 -7),False)
 
+plt.plot(kiresoff1,delta_resoff1,label="offset $V$ = $(\\pi/2)^{2} -1$")
+plt.plot(kiresoff2,delta_resoff2,label="offset $V$ = $(3\\pi/2)^{2} +2$")
+plt.plot(kiresoff3,delta_resoff3,label="offset $V$ = $(5\\pi/2)^{2} -2$")
 
+plt.title('phase shift vs momentum (different values of gamma)')
+plt.xlabel('momentum')
+plt.ylabel('phase shift')
 # -------- Wavefunction for resonance --------
 
 '''
