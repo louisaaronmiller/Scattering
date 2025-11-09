@@ -472,9 +472,9 @@ delta_res1, Elistres1, kires1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(
 delta_res2, Elistres2, kires2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(3*np.pi)**2,False)
 delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(5*np.pi)**2,False)
 
-plt.plot(kires1,delta_res1,label="$\\gamma$ = $\\pi/2$")
-plt.plot(kires2,delta_res2,label="$\\gamma$ = $3\\pi/2$")
-plt.plot(kires3,delta_res3,label="$\\gamma$ = $5\\pi/2$")
+plt.plot(kires1,delta_res1,'r',label="$\\gamma$ = $\\pi/2$")
+plt.plot(kires2,delta_res2,'g',label="$\\gamma$ = $3\\pi/2$")
+plt.plot(kires3,delta_res3,'b',label="$\\gamma$ = $5\\pi/2$")
 
 # ------------------------------------ checking small perturbations in potential to see if phase shift vs momentum shows anything different.
 
@@ -482,9 +482,9 @@ delta_resoff1, Elistres1, kiresoff1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,
 delta_resoff2, Elistres2, kiresoff2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((3*np.pi)**2 +9),False)
 delta_resoff3, Elistres3, kiresoff3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((5*np.pi)**2 -7),False)
 
-plt.plot(kiresoff1,delta_resoff1,label="offset $V$ = $(\\pi/2)^{2} -1$")
-plt.plot(kiresoff2,delta_resoff2,label="offset $V$ = $(3\\pi/2)^{2} +2$")
-plt.plot(kiresoff3,delta_resoff3,label="offset $V$ = $(5\\pi/2)^{2} -2$")
+plt.plot(kiresoff1,delta_resoff1,'--r',label="offset $V$ = $(\\pi/2)^{2} -5$")
+plt.plot(kiresoff2,delta_resoff2,'--g',label="offset $V$ = $(3\\pi/2)^{2} +9$")
+plt.plot(kiresoff3,delta_resoff3,'--b',label="offset $V$ = $(5\\pi/2)^{2} -7$")
 
 plt.title('phase shift vs momentum (different values of gamma)')
 plt.xlabel('momentum')
