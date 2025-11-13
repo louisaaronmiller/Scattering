@@ -204,8 +204,12 @@ def analytical_deltal(E,l,V_0=V_0,a=R):
     '''
         The same function as analytical_delta0, but for l>0
     '''
-    k = math.sqrt(E)
-    K = math.sqrt(E-V_0)
+    if V_0 < 0:
+        k = math.sqrt(E)
+        K = math.sqrt(E-V_0)
+    else:
+        k = math.sqrt(E)
+        K = math.sqrt(E +V_0)
     # -------- k --------
 
     j_l_k = spherical_jn(l, k * a)
@@ -468,27 +472,41 @@ plt.xlabel("Potential Energy-Radii Relation $\\gamma$")
 
 '''
 # -------- Phaseshift vs momentum for each resonance 0,1,2 --------
-delta_res1, Elistres1, kires1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(np.pi)**2,False)
-delta_res2, Elistres2, kires2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(3*np.pi)**2,False)
-delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,(5*np.pi)**2,False)
 
-plt.plot(kires1,delta_res1,'r',label="$\\gamma$ = $\\pi/2$")
-plt.plot(kires2,delta_res2,'g',label="$\\gamma$ = $3\\pi/2$")
-plt.plot(kires3,delta_res3,'b',label="$\\gamma$ = $5\\pi/2$")
+delta_res1, Elistres1, kires1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi/4)**2),False)
+delta_res2, Elistres2, kires2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi)**2),False)
+delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((4*np.pi/2)**2),False)
+
+plt.plot(kires1,delta_res1,'r',label="$\\gamma$ = $\\pi/4, U_0 = (\\pi/4)^{2}$")
+plt.plot(kires2,delta_res2,'g',label="$\\gamma$ = $\\pi, U_0 = (\\pi)^{2}$")
+plt.plot(kires3,delta_res3,'b',label="$\\gamma$ = $4\\pi/2, U_0 = (4\\pi/2)^{2}$")
 
 # ------------------------------------ checking small perturbations in potential to see if phase shift vs momentum shows anything different.
+'''
+delta_resoff1, Elistres1, kiresoff1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi/2)**2 - 5),False)
+delta_resoff2, Elistres2, kiresoff2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((3*np.pi/2)**2 +9),False)
+delta_resoff3, Elistres3, kiresoff3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((5*np.pi/2)**2 -7),False)
 
-delta_resoff1, Elistres1, kiresoff1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((np.pi)**2 - 5),False)
-delta_resoff2, Elistres2, kiresoff2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((3*np.pi)**2 +9),False)
-delta_resoff3, Elistres3, kiresoff3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,((5*np.pi)**2 -7),False)
+plt.plot(kiresoff1,delta_resoff1,'--r',label="offset $U_0$ = $(\\pi/2)^{2} -5$")
+plt.plot(kiresoff2,delta_resoff2,'--g',label="offset $U_0$ = $(3\\pi/2)^{2} +9$")
+plt.plot(kiresoff3,delta_resoff3,'--b',label="offset $U_0$ = $(5\\pi/2)^{2} -7$")
+'''
 
-plt.plot(kiresoff1,delta_resoff1,'--r',label="offset $V$ = $(\\pi/2)^{2} -5$")
-plt.plot(kiresoff2,delta_resoff2,'--g',label="offset $V$ = $(3\\pi/2)^{2} +9$")
-plt.plot(kiresoff3,delta_resoff3,'--b',label="offset $V$ = $(5\\pi/2)^{2} -7$")
+# -------- Phaseshift vs momentum ANALYTICAL for each resonance 0,1,2 --------
 
-plt.title('phase shift vs momentum (different values of gamma)')
-plt.xlabel('momentum')
-plt.ylabel('phase shift')
+a_delta0_firstres = [analytical_deltal(i,l = 0,V_0=(np.pi/2)**2,a=1) for i in Elistres1]
+a_delta0_secondres = [analytical_deltal(i,l = 0,V_0=(3*np.pi/2)**2,a=1) for i in Elistres2]
+a_delta0_thirdres = [analytical_deltal(i,l = 0,V_0=(5*np.pi/2)**2,a=1) for i in Elistres3]
+
+plt.plot(kires1,a_delta0_firstres, '--r', label='Analytical, $\\gamma$ = $\\pi/2$')
+plt.plot(kires2,a_delta0_secondres, '--g', label='Analytical, $\\gamma$ = $3\\pi/2$')
+plt.plot(kires3,a_delta0_thirdres, '--b', label='Analytical, $\\gamma$ = $5\\pi/2$')
+
+
+plt.title('Phase Shift vs Momentum for Different Values of Gamma')
+plt.xlabel('Momentum')
+plt.ylabel('Phase Shift')
+           
 # -------- Wavefunction for resonance --------
 
 '''
