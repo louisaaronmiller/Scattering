@@ -372,8 +372,22 @@ def ScatterLength(l: int,E=1e-3,rmax = rmax,R=R, h = 0.001,flag = True):
         sigmas.append(sig)
     phase = np.array(delta)
     scattering_length = - phase / k
-    V_0abs = np.positive(V_0)
+    V_0abs = np.abs(V_0)
     return delta, V_0, k, sigmas, scattering_length, V_0abs
+
+
+def AnSL(a):
+    V_0 = np.linspace(1,65,500)
+    SLarr = []
+    for i in V_0:
+        gamma = (i**0.5) * a
+        SL = (1 - (np.tan(gamma))/(gamma)) * a
+        SLarr.append(SL)
+    return V_0,SLarr
+
+def wavefunctionunshifted(l: int, E: float, rmax, R, V_0, h = 0.01):
+    u, r =  Numerov(l=l, E=E,rmax = rmax,R=R, h = 0.01,V_0=V_0)
+    return u,r
 
 # -------------------- Result taking --------------------
 
@@ -548,15 +562,59 @@ plt.scatter(r3[0],u3[0],label='5pi/2')
 '''
 
 # -------- Scattering length vs potential --------
+'''
 delta, V_0, k, sigmas, scattering_length,V_0abs = ScatterLength(l=0,E=1e-4,rmax=600
                                                          ,R=1)
 
+V_0an, SLan = AnSL(1)
 
-plt.plot(V_0abs ,scattering_length,color = 'k')
-plt.xlabel('Magnitude of Potential $V_0$')
+plt.plot(V_0abs ,scattering_length,color = 'k',label = 'Numerical')
+plt.plot(V_0an,SLan,'--b',label = 'Analytical')
+plt.xlabel('Magnitude of $V_0$')
 plt.ylabel('Scattering Length')
+plt.ylim(-35,45)
+plt.plot([(np.pi/2)**2,(np.pi/2)**2], [-40,50], '--r',label='Resonance')
+plt.plot([((3 *np.pi)/2)**2,((3 *np.pi)/2)**2], [-40,50], '--r',label='_nolegend_')
+plt.plot([((5 *np.pi)/2)**2,((5 *np.pi)/2)**2], [-40,50], '--r',label='_nolegend_')
 
+plt.text(5, 15, '$(\\frac{\\pi}{2})^2$', fontsize=17)
+plt.text(24, 20, "$(\\frac{3\\pi}{2})^2$", fontsize=17)
+plt.text(52, 25, "$(\\frac{5\\pi}{2})^2$", fontsize=17)
+'''
+
+# -------- Wavefunction and its phase diff --------
+u1,r1 = wavefunctionunshifted(l=0, E=5, rmax = 4,R= 2,V_0= 0,h = 0.01)
+u2,r2 = wavefunctionunshifted(l=0, E=5, rmax = 4,R= 2,V_0= -5,h = 0.01)
+u3,r3 = wavefunctionunshifted(l=0, E=5, rmax = 4,R= 2,V_0= -100,h = 0.01)
+
+
+u_aug, r_aug = outside_vals(r1, u1,R=2)
+r_new1, u_new1 = r_1halfr_2(r_aug, u_aug, 5)
+
+u_aug2, r_aug2 = outside_vals(r2, u2,R=2)
+r_new2, u_new2 = r_1halfr_2(r_aug2, u_aug2, 5)
+
+
+plt.plot(r2,u2, 'k',label = 'Scattered wave')
+plt.plot(r1,u1,'--r',label='Undeflected wave')
+plt.scatter(r_new1[-1],u_new1[-1],color = 'green')
+plt.scatter(r_new2[-1],u_new2[-1],color = 'green')
+#plt.plot(r3,u3,label='_nolegend_')
+plt.arrow(2.70, 0.4, 0.75, 0, head_width=0.03, head_length=0.1, fc='black', ec='black',zorder =5)
+plt.arrow(2.70 + 0.75, 0.4,- 0.70, 0, head_width=0.03, head_length=0.1, fc='black', ec='black',zorder =5)
+plt.xlim(0,4)
+# Add the label using plt.text()
+plt.text(3.1, 0.44, '$\\delta_0$', ha='center', va='center',fontsize=15)
+plt.axvspan(-1, 1, color='grey', alpha=0.3,label = 'Potential')
+
+
+# -------- Wavefunction and its phase diff --------
+
+
+plt.xlabel('$r$')
+plt.ylabel('$\\psi$')
 plt.legend()
 plt.minorticks_on()
 plt.grid()
+plt.savefig('wavefunctionshowingphaseshift4.pdf', format='pdf', bbox_inches='tight')
 plt.show()
