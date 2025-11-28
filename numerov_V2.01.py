@@ -347,7 +347,33 @@ def findingResWave(l,E=1e-3,V_0=V_0,h=0.005,rmax = 5):
             third_res_u.append(u)
     return first_res_r,first_res_u,second_res_r,second_res_u,third_res_r,third_res_u
 
+def ScatterLength(l: int,E=1e-3,rmax = rmax,R=R, h = 0.001,flag = True):
+    '''
+    This function varies potential of the sphere
+    '''
+    V_0 = np.linspace(-1,-65,500)
+    if flag is False:
+        E = np.linspace(E_min,E_max,500)
+    delta = []
+    k = []
+    sigmas = []
+    for i in V_0:
+        k.append(np.sqrt(E))
 
+        u, r = Numerov(l, E, rmax, R, h, i) 
+        u_aug, r_aug = outside_vals(r, u ,R)
+        r_new, u_new = r_1halfr_2(r_aug, u_aug, E) 
+
+        phaseshift = delta_l(l, r_new, K(r_new, u_new), E) 
+        # print(f"phase shifts: {phaseshift}")
+        delta.append(phaseshift[-1])
+
+        sig = sigma(l,phaseshift[-1],E)
+        sigmas.append(sig)
+    phase = np.array(delta)
+    scattering_length = - phase / k
+    V_0abs = np.positive(V_0)
+    return delta, V_0, k, sigmas, scattering_length, V_0abs
 
 # -------------------- Result taking --------------------
 
@@ -367,14 +393,14 @@ a_delta2 = [analytical_deltal(i,2) for i in Elist2]
 a_delta3 = [analytical_deltal(i,3) for i in Elist3]
 
 a_sigma0 = [analytical_sigma0(j,i) for j,i in zip(a_delta0,Elist0)]
-'''
+
 # -------- Resonance --------
 
 delta_r_0, sigma_r_0, scattering_length_0, gamma_r_0, res_indexs_0, a_vals_0 = findingResonance(0,E=1e-3,V_0=-V_0,h=0.01,rmax = 200)
 r1,u1,r2,u2,r3,u3 = findingResWave(0,E=1e-3,V_0=-V_0,h=0.01,rmax = 200)
 
 # -------------------- Plotting --------------------
-
+'''
 '''
 fig, axs = plt.subplots(2, 2, figsize=(12, 8))  
 axs = axs.ravel()  
@@ -472,7 +498,7 @@ plt.xlabel("Potential Energy-Radii Relation $\\gamma$")
 
 '''
 # -------- Phaseshift vs momentum for each resonance 0,1,2 --------
-
+'''
 delta_res1, Elistres1, kires1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi/4)**2),False)
 delta_res2, Elistres2, kires2, sigmares2 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi)**2),False)
 delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((4*np.pi/2)**2),False)
@@ -480,7 +506,7 @@ delta_res3, Elistres3, kires3, sigmares3 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-
 plt.plot(kires1,delta_res1,'r',label="$\\gamma$ = $\\pi/4, U_0 = (\\pi/4)^{2}$")
 plt.plot(kires2,delta_res2,'g',label="$\\gamma$ = $\\pi, U_0 = (\\pi)^{2}$")
 plt.plot(kires3,delta_res3,'b',label="$\\gamma$ = $4\\pi/2, U_0 = (4\\pi/2)^{2}$")
-
+'''
 # ------------------------------------ checking small perturbations in potential to see if phase shift vs momentum shows anything different.
 '''
 delta_resoff1, Elistres1, kiresoff1, sigmares1 = PhaseforEnergy(0,1e-3,50,200,1,0.01,-((np.pi/2)**2 - 5),False)
@@ -493,7 +519,7 @@ plt.plot(kiresoff3,delta_resoff3,'--b',label="offset $U_0$ = $(5\\pi/2)^{2} -7$"
 '''
 
 # -------- Phaseshift vs momentum ANALYTICAL for each resonance 0,1,2 --------
-
+'''
 a_delta0_firstres = [analytical_deltal(i,l = 0,V_0=(np.pi/2)**2,a=1) for i in Elistres1]
 a_delta0_secondres = [analytical_deltal(i,l = 0,V_0=(3*np.pi/2)**2,a=1) for i in Elistres2]
 a_delta0_thirdres = [analytical_deltal(i,l = 0,V_0=(5*np.pi/2)**2,a=1) for i in Elistres3]
@@ -506,7 +532,7 @@ plt.plot(kires3,a_delta0_thirdres, '--b', label='Analytical, $\\gamma$ = $5\\pi/
 plt.title('Phase Shift vs Momentum for Different Values of Gamma')
 plt.xlabel('Momentum')
 plt.ylabel('Phase Shift')
-           
+'''      
 # -------- Wavefunction for resonance --------
 
 '''
@@ -521,6 +547,14 @@ plt.scatter(r2[0],u2[0],label='3pi/2')
 plt.scatter(r3[0],u3[0],label='5pi/2')
 '''
 
+# -------- Scattering length vs potential --------
+delta, V_0, k, sigmas, scattering_length,V_0abs = ScatterLength(l=0,E=1e-4,rmax=600
+                                                         ,R=1)
+
+
+plt.plot(V_0abs ,scattering_length,color = 'k')
+plt.xlabel('Magnitude of Potential $V_0$')
+plt.ylabel('Scattering Length')
 
 plt.legend()
 plt.minorticks_on()
